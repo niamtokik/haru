@@ -1,6 +1,6 @@
-CC_INCLUDE_PATH = -I/usr/local/include
-CC_LIBS_PATH = -L/usr/local/lib
-CC_LIBS_NAME = -lhpdf
+CC_INCLUDE_PATH = -I/usr/local/include -I/usr/local/lib/erlang21/usr/include/
+CC_LIBS_PATH = -L/usr/local/lib -L/usr/local/lib/erlang21/usr/lib
+CC_LIBS_NAME = -lhpdf -lei 
 CC_ARGS  = $(CC_INCLUDE_PATH)
 CC_ARGS += $(CC_LIBS_PATH)
 CC_ARGS += $(CC_LIBS_NAME)
