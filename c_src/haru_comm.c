@@ -68,3 +68,34 @@ int
 read_data(int fd, unsigned char *buffer, size_t length) {
   return read(fd, buffer, length);
 }
+
+/* write_length1
+ */
+int
+write_length1(int fd, unsigned int length) {
+  unsigned char buf[1] = { length };
+  return write(fd, buf, 1);
+}
+
+/* write_length2
+ */
+int
+write_length2(int fd, unsigned int length){
+  unsigned char buf[2] = { length >> 8, length };
+  return write(fd, buf, 2);
+}
+
+/* write_length4
+ */
+int
+write_length4(int fd, unsigned int length){
+  unsigned char buf[4] = { length >> 24, length >> 16, length >> 8, length };
+  return write(fd, buf, 4);
+}
+
+/* write_data
+ */
+int
+write_data(int fd, unsigned char *buffer, size_t length) {
+  return write(fd, buffer, length);
+}
