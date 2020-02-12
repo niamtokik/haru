@@ -1,0 +1,2 @@
+-module(harulib).
+-compile(export_all).
