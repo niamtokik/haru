@@ -7,7 +7,7 @@ int tests_run = 0;
 int fd[2];
 
 static char *
-read_length1_test() {
+read_length1_test(void) {
   unsigned char len[1];
 
   /* check 0x0 size */
@@ -23,7 +23,7 @@ read_length1_test() {
 }
 
 static char *
-read_length2_test() {
+read_length2_test(void) {
   unsigned char len[2];
   
   /* check 0x0 size */
@@ -50,7 +50,7 @@ read_length2_test() {
 }
 
 static char *
-read_length4_test() {
+read_length4_test(void) {
   unsigned char len[4];
   
   /* check 0x0 size */
@@ -72,7 +72,7 @@ read_length4_test() {
 }
 
 static char *
-read_length_test() {
+read_length_test(void) {
   unsigned char len[4] = {0xff, 0xff, 0xff, 0xff};
 
   /* check 0xff */
@@ -90,11 +90,55 @@ read_length_test() {
   return 0;
 }
 
+static char *
+read_data_test(void) {
+  unsigned char len[8] = { 0, 0, 0, 0,
+                           0, 0, 0, 0 };
+  unsigned char buf[8] = { 0, 0, 0, 0,
+                           0, 0, 0, 0 };
+
+  /* check with length1 and 'a' */
+  len[0] = 0x1;
+  len[1] = 'a';
+  write(fd[0], len, 2);
+  read_data(fd[1], buf, read_length(1, fd[1]));
+  mu_assert("read_data 'a'", buf[0] == 'a' && buf[1] == 0x0);
+  buf[0] = 0x0;
+
+  /* check with length2 and 'ab' */
+  len[0] = 0x0;
+  len[1] = 0x2;
+  len[2] = 'a';
+  len[3] = 'b';
+  write(fd[0], len, 4);
+  read_data(fd[1], buf, read_length(2, fd[1]));
+  mu_assert("read_data 'ab'", buf[0] == 'a' && buf[1] == 'b' && buf[2] == 0x0);
+
+  /* check with length4 and 'abcd' */
+  len[0] = 0x0; len[1] = 0x0; len[2] = 0x0; len[3] = 0x4;
+  len[4] = 'a'; len[5] = 'b'; len[6] = 'c'; len[7] = 'd';
+  write(fd[0], len, 8);
+  read_data(fd[1], buf, read_length(4, fd[1]));
+  mu_assert("read_data 'abcd'",
+            buf[0] == 'a' &&
+            buf[1] == 'b' &&
+            buf[2] == 'c' &&
+            buf[3] == 'd');
+  
+  return 0;
+}
+
 void
 init_test(void) {
 	if(pipe(fd)) {
 		printf("error with pipe create\n");
 	}
+}
+
+void
+end_test(void) {
+  close(fd[1]);
+  close(fd[0]);
 }
 
 static char * all_tests() {
@@ -103,6 +147,8 @@ static char * all_tests() {
 	mu_run_test(read_length2_test);
 	mu_run_test(read_length4_test);
 	mu_run_test(read_length_test);
+        mu_run_test(read_data_test);
+        end_test();
 	return 0;
 }
 

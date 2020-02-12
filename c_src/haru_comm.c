@@ -35,3 +35,8 @@ read_length(int packet_size, int fd) {
   default: return -1;
   }
 }
+
+int
+read_data(int fd, unsigned char *buffer, size_t length) {
+  return read(fd, buffer, length);
+}
