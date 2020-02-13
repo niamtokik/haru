@@ -1,24 +1,37 @@
-/* haru_comm.c: create C facilities/helpers for Erlang ports and C
+/** 
+ * haru_comm.c: create C facilities/helpers for Erlang ports and C
  * drivers.
  */
 #include <stdio.h>
 #include <unistd.h>
 
-/* read_wlimit read data from defined file descriptor and store it in
+/** 
+ * read_wlimit read data from defined file descriptor and store it in
  * buf. The numbers of byte took is set with buf_len.
+ * 
+ * @param fd open file descriptor.
+ * 
+ * @param buf buffer initialized by the user.
+ * 
+ * @param data_len size of the data read on the file descriptor.
+ *
+ * @param limit size limit of the buffer.
  */
 int
-read_wlimit(int fd, unsigned char *buf, size_t buf_len, size_t limit) {
+read_wlimit(int fd, unsigned char *buf, size_t data_len, size_t limit) {
   int i, ret;
-  for(i=1; (ret=read(fd, buf, buf_len)) && i<limit; i+=buf_len, buf+=i);
+  for(i=1; (ret=read(fd, buf, data_len)) && i<limit; i+=data_len, buf+=i);
   return ret;
 }
 
-/* read_length1 read 1 byte from an open file descriptor and convert
+/** 
+ * read_length1 read 1 byte from an open file descriptor and convert
  * it in unsigned integer. This code can be used with Erlang ports
  * feature to read the size of the packet sent. In this case, this
  * function should be used with erlang:open_port/2 and argument:
  * [{packet, 1}]
+ *
+ * @param fd opened file descriptor.
  */
 unsigned int
 read_length1(int fd) {
@@ -27,11 +40,14 @@ read_length1(int fd) {
   return (int)buf[0];
 }
 
-/* read_length2 read 2 bytes (16bits) from an open file descriptor and
+/** 
+ * read_length2 read 2 bytes (16bits) from an open file descriptor and
  * convert them in unsigned integer. This code can be used with Erlang
- * ports feature to read the size of the packet sent. In this case,
+ * ports feature to read the size of the packet sent. In this case, *
  * this function should be used with erlang:open_port/2 and argument:
  * [{packet, 2}]
+ * 
+ * @param fd opened file descriptor.
  */
 unsigned int
 read_length2(int fd) {
@@ -41,11 +57,14 @@ read_length2(int fd) {
     + buf[1];
 }
 
-/* read_length4 read 4 bytes (32bits) from an open file descriptor and
+/** 
+ * read_length4 read 4 bytes (32bits) from an open file descriptor and
  * convert them in unsigned integer. This code can be used with Erlang
  * ports feature to read the size of the packet sent. In this case,
  * this function should be used with erlang:open_port/2 and argument:
  * [{packet, 4}].
+ * 
+ * @param fd opened file descriptor
  */
 unsigned int
 read_length4(int fd) {
@@ -57,11 +76,16 @@ read_length4(int fd) {
     + buf[3];
 }
 
-/* read_length is a facility and call read_length1 or read_length2 or
+/** 
+ * read_length is a facility and call read_length1 or read_length2 or
  * read_length4 functions based on the packet_size argument.
+ *
+ * @param fd opened file descriptor
+ *
+ * @param packet_size size of the data to read.
  */
 unsigned int
-read_length(int packet_size, int fd) {
+read_length(int fd, int packet_size) {
   switch(packet_size) {
   case 1: return read_length1(fd);
   case 2: return read_length2(fd);
@@ -70,16 +94,29 @@ read_length(int packet_size, int fd) {
   }
 }
 
-/* read_data from a file descriptor based on the length of the data
+/** 
+ * read_data from a file descriptor based on the length of the data
  * (you can get it from read_length functions) and store them in
  * *buffer.
+ *
+ * @param fd opened file descriptor
+ * 
+ * @param buffer where the data will be stored
+ *
+ * @param length length of the data to read
  */
 int
 read_data(int fd, unsigned char *buffer, size_t length) {
   return read(fd, buffer, length);
 }
 
-/* write_length1
+/** 
+ * write_length1 take an integer 'length', convert it in 1 byte and
+ * write it in file descriptor 'fd'.
+ *
+ * @param fd opened file descriptor
+ *
+ * @param length length to encode on 1 byte
  */
 int
 write_length1(int fd, unsigned int length) {
@@ -87,7 +124,13 @@ write_length1(int fd, unsigned int length) {
   return write(fd, buf, 1);
 }
 
-/* write_length2
+/** 
+ * write_length2 take an integer 'length', convert it in 2 bytes and
+ * write it in file descriptor 'fd'.
+ *
+ * @param fd opened file descriptor
+ *
+ * @param length length to encode on 2 bytes
  */
 int
 write_length2(int fd, unsigned int length){
@@ -96,7 +139,13 @@ write_length2(int fd, unsigned int length){
   return write(fd, buf, 2);
 }
 
-/* write_length4
+/** 
+ * write_length4 take an integer 'length', convert it in 4 bytes and
+ * write them in file descriptor 'fd'.
+ *
+ * @param fd opened file descriptor
+ *
+ * @param length length to encode on 4 bytes
  */
 int
 write_length4(int fd, unsigned int length){
@@ -107,9 +156,16 @@ write_length4(int fd, unsigned int length){
   return write(fd, buf, 4);
 }
 
-/* write_data
+/** 
+ * write_data
+ *
+ * @param fd opened file descriptor
+ *
+ * @param buffer data buffer to write in the file descriptor
+ * 
+ * @param length length to encode.
  */
 int
-write_data(int fd, unsigned char *buf, size_t length) {
+write_data(int fd, unsigned char *buffer, size_t length) {
   return write(fd, buf, length);
 }

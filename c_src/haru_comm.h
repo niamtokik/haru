@@ -1,3 +1,6 @@
+/* haru_comm.h
+ *
+ */
 int read_wlimit(int, unsigned char *, size_t, size_t);
 unsigned int read_length1(int);
 unsigned int read_length2(int);

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include "haru_comm.h"
 #include "hpdf.h"
+#include <ei.h>
 #define BUFFER 256
 #define FD_READ 0
 #define FD_WRITE 1
