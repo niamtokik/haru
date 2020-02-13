@@ -4,6 +4,16 @@
 #include <stdio.h>
 #include <unistd.h>
 
+/* read_wlimit read data from defined file descriptor and store it in
+ * buf. The numbers of byte took is set with buf_len.
+ */
+int
+read_wlimit(int fd, unsigned char *buf, size_t buf_len, size_t limit) {
+  int i, ret;
+  for(i=1; (ret=read(fd, buf, buf_len)) && i<limit; i+=buf_len, buf+=i);
+  return ret;
+}
+
 /* read_length1 read 1 byte from an open file descriptor and convert
  * it in unsigned integer. This code can be used with Erlang ports
  * feature to read the size of the packet sent. In this case, this
@@ -81,7 +91,8 @@ write_length1(int fd, unsigned int length) {
  */
 int
 write_length2(int fd, unsigned int length){
-  unsigned char buf[2] = { length >> 8, length };
+  unsigned char buf[2] = { length >> 8,
+                           length };
   return write(fd, buf, 2);
 }
 
@@ -89,13 +100,16 @@ write_length2(int fd, unsigned int length){
  */
 int
 write_length4(int fd, unsigned int length){
-  unsigned char buf[4] = { length >> 24, length >> 16, length >> 8, length };
+  unsigned char buf[4] = { length >> 24,
+                           length >> 16,
+                           length >> 8,
+                           length };
   return write(fd, buf, 4);
 }
 
 /* write_data
  */
 int
-write_data(int fd, unsigned char *buffer, size_t length) {
-  return write(fd, buffer, length);
+write_data(int fd, unsigned char *buf, size_t length) {
+  return write(fd, buf, length);
 }
