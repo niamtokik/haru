@@ -1,4 +1,5 @@
-/* haru_test.c: test unit based with minut.
+/**
+ * haru_test.c: test unit based with minut.
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -7,7 +8,8 @@
 #include "haru_comm.h"
 #include "minunit.h"
 
-/* test initialization
+/** 
+ * test initialization
  *   - tests_run is required by minunit
  *   - fd[2] will contain the pipe to test 
  *     file descriptors read/write
@@ -15,12 +17,15 @@
 int tests_run = 0;
 int fd[2];
 
+/**
+ * read_wlimit_test
+ */
 static char *
 read_wlimit_test(void) {
   unsigned char len[8];
   unsigned char buf[8];
   
-  /* 1byte read test 0x0 */
+  /* 1 byte read test 0x0 */
   bzero(len, 8);
   bzero(buf, 8);
   write(fd[0], len, 8);
@@ -28,7 +33,7 @@ read_wlimit_test(void) {
   mu_assert("read_wlimit 0x0", buf[0]  == 0);
   mu_assert("read_wlimit 0x0", buf[7]  == 0);
 
-  /* 1byte read test 0xffdd 0xccbb 0xaa99 0x8877 */
+  /* 1 byte read test 0xffdd 0xccbb 0xaa99 0x8877 */
   bzero(len, 8);
   bzero(buf, 8);
   len[0] = 0xff; len[1] = 0xdd; len[2] = 0xcc; len[3] = 0xbb;
@@ -41,6 +46,9 @@ read_wlimit_test(void) {
   return 0;
 }
 
+/**
+ * read_length1_test
+ */
 static char *
 read_length1_test(void) {
   unsigned char len[1];
@@ -57,6 +65,9 @@ read_length1_test(void) {
   return 0;
 }
 
+/**
+ * read_length2_test
+ */
 static char *
 read_length2_test(void) {
   unsigned char len[2];
@@ -89,6 +100,9 @@ read_length2_test(void) {
   return 0;
 }
 
+/**
+ * read_length4_test
+ */
 static char *
 read_length4_test(void) {
   unsigned char len[4];
@@ -112,25 +126,31 @@ read_length4_test(void) {
   return 0;
 }
 
+/**
+ * read_length_test
+ */
 static char *
 read_length_test(void) {
   unsigned char len[4] = {0xcf, 0xab, 0x12, 0x45};
   
   /* check 0xff */
   write(fd[0], len, 1);
-  mu_assert("length1", read_length(1, fd[1]) == 0xcf);
+  mu_assert("length1", read_length(fd[1], 1) == 0xcf);
 
   /* check 0xffff */
   write(fd[0], len, 2);
-  mu_assert("length2", read_length(2, fd[1]) == 0xcfab);
+  mu_assert("length2", read_length(fd[1], 2) == 0xcfab);
 
   /* check 0xffffffff */
   write(fd[0], len, 4);
-  mu_assert("length4", read_length(4, fd[1]) == 0xcfab1245);
+  mu_assert("length4", read_length(fd[1], 4) == 0xcfab1245);
 
   return 0;
 }
 
+/**
+ * read_data_test
+ */
 static char *
 read_data_test(void) {
   unsigned char len[8];
@@ -142,7 +162,7 @@ read_data_test(void) {
   len[0] = 0x1;
   len[1] = 'a';
   write(fd[0], len, 2);
-  read_data(fd[1], buf, read_length(1, fd[1]));
+  read_data(fd[1], buf, read_length(fd[1], 1));
   mu_assert("read_data 'a'", buf[0] == 'a' && buf[1] == 0x0);
   buf[0] = 0x0;
 
@@ -152,14 +172,14 @@ read_data_test(void) {
   len[2] = 'a';
   len[3] = 'b';
   write(fd[0], len, 4);
-  read_data(fd[1], buf, read_length(2, fd[1]));
+  read_data(fd[1], buf, read_length(fd[1], 2));
   mu_assert("read_data 'ab'", buf[0] == 'a' && buf[1] == 'b' && buf[2] == 0x0);
 
   /* check with length4 and 'abcd' */
   len[0] = 0x0; len[1] = 0x0; len[2] = 0x0; len[3] = 0x4;
   len[4] = 'a'; len[5] = 'b'; len[6] = 'c'; len[7] = 'd';
   write(fd[0], len, 8);
-  read_data(fd[1], buf, read_length(4, fd[1]));
+  read_data(fd[1], buf, read_length(fd[1], 4));
   mu_assert("read_data 'abcd'",
             buf[0] == 'a' &&
             buf[1] == 'b' &&
@@ -169,6 +189,9 @@ read_data_test(void) {
   return 0;
 }
 
+/**
+ * write_length1_test
+ */
 static char *
 write_length1_test() {
   write_length1(fd[0], 0x1);
@@ -178,6 +201,9 @@ write_length1_test() {
   return 0;
 }
 
+/**
+ * write_length2_test
+ */
 static char *
 write_length2_test() {
   write_length2(fd[0], 0x1);
@@ -187,6 +213,9 @@ write_length2_test() {
   return 0;
 }
 
+/**
+ * read_length4_test
+ */
 static char *
 write_length4_test() {
   write_length4(fd[0], 0x1);
@@ -196,7 +225,8 @@ write_length4_test() {
   return 0;
 }
 
-/* init_test create 2 file descriptors (pipe) stored in fd buffer.
+/** 
+ *init_test create 2 file descriptors (pipe) stored in fd buffer.
  */
 void
 init_test(void) {
@@ -206,7 +236,8 @@ init_test(void) {
 	}
 }
 
-/* end_test clean test unit sequence.
+/**
+ * end_test clean test unit sequence.
  */
 void
 end_test(void) {
@@ -214,6 +245,9 @@ end_test(void) {
   close(fd[0]);
 }
 
+/**
+ * all_tests
+ */
 static char * all_tests() {
 	init_test();
         mu_run_test(read_wlimit_test);
@@ -229,6 +263,9 @@ static char * all_tests() {
 	return 0;
 }
 
+/**
+ * main
+ */
 int
 main(void) {
 	char *result = all_tests();

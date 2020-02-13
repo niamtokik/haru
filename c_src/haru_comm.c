@@ -18,9 +18,9 @@
  * @param limit size limit of the buffer.
  */
 int
-read_wlimit(int fd, unsigned char *buf, size_t data_len, size_t limit) {
+read_wlimit(int fd, unsigned char *buffer, size_t data_len, size_t limit) {
   int i, ret;
-  for(i=1; (ret=read(fd, buf, data_len)) && i<limit; i+=data_len, buf+=i);
+  for(i=1; (ret=read(fd, buffer, data_len)) && i<limit; i+=data_len, buffer+=i);
   return ret;
 }
 
@@ -35,9 +35,9 @@ read_wlimit(int fd, unsigned char *buf, size_t data_len, size_t limit) {
  */
 unsigned int
 read_length1(int fd) {
-  unsigned char buf[1];
-  read(fd, buf, 1);
-  return (int)buf[0];
+  unsigned char buffer[1];
+  read(fd, buffer, 1);
+  return (int)buffer[0];
 }
 
 /** 
@@ -51,10 +51,10 @@ read_length1(int fd) {
  */
 unsigned int
 read_length2(int fd) {
-  unsigned char buf[2];
-  read(fd, buf, 2);
-  return (buf[0] << 8)
-    + buf[1];
+  unsigned char buffer[2];
+  read(fd, buffer, 2);
+  return (buffer[0] << 8)
+    + buffer[1];
 }
 
 /** 
@@ -68,12 +68,12 @@ read_length2(int fd) {
  */
 unsigned int
 read_length4(int fd) {
-  unsigned char buf[4];
-  read(fd, buf, 4);
-  return (buf[0] << 24)
-    + (buf[1] << 16)
-    + (buf[2] << 8)
-    + buf[3];
+  unsigned char buffer[4];
+  read(fd, buffer, 4);
+  return (buffer[0] << 24)
+    + (buffer[1] << 16)
+    + (buffer[2] << 8)
+    + buffer[3];
 }
 
 /** 
@@ -120,8 +120,8 @@ read_data(int fd, unsigned char *buffer, size_t length) {
  */
 int
 write_length1(int fd, unsigned int length) {
-  unsigned char buf[1] = { length };
-  return write(fd, buf, 1);
+  unsigned char buffer[1] = { length };
+  return write(fd, buffer, 1);
 }
 
 /** 
@@ -134,9 +134,9 @@ write_length1(int fd, unsigned int length) {
  */
 int
 write_length2(int fd, unsigned int length){
-  unsigned char buf[2] = { length >> 8,
-                           length };
-  return write(fd, buf, 2);
+  unsigned char buffer[2] = { length >> 8,
+                              length };
+  return write(fd, buffer, 2);
 }
 
 /** 
@@ -149,11 +149,11 @@ write_length2(int fd, unsigned int length){
  */
 int
 write_length4(int fd, unsigned int length){
-  unsigned char buf[4] = { length >> 24,
-                           length >> 16,
-                           length >> 8,
-                           length };
-  return write(fd, buf, 4);
+  unsigned char buffer[4] = { length >> 24,
+                              length >> 16,
+                              length >> 8,
+                              length };
+  return write(fd, buffer, 4);
 }
 
 /** 
@@ -167,5 +167,5 @@ write_length4(int fd, unsigned int length){
  */
 int
 write_data(int fd, unsigned char *buffer, size_t length) {
-  return write(fd, buf, length);
+  return write(fd, buffer, length);
 }
