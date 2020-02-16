@@ -225,6 +225,126 @@ write_length4_test() {
   return 0;
 }
 
+/**
+ * write_length help function testing
+ */
+static char *
+write_length_test() {
+  write_length(fd[0], 1, 0x1);
+  mu_assert("write_length 1", read_length1(fd[1]) == 0x1);
+
+  write_length(fd[0], 2, 0x1);
+  mu_assert("write_length 2", read_length2(fd[1]) == 0x1);
+
+  write_length(fd[0], 4, 0x1);
+  mu_assert("write_length 4", read_length4(fd[1]) == 0x1);
+  return 0;
+}
+
+/**
+ * byte_length configuration
+ */
+static char *
+byte_length_test() {
+  mu_assert("set byte length to 1", set_byte_length(1) == 0);
+  mu_assert("get byte length (1)", get_byte_length() == 1);
+
+  mu_assert("set byte length to 2", set_byte_length(2) == 0);
+  mu_assert("get byte length (2)", get_byte_length() == 2);
+
+  mu_assert("set byte length to 4", set_byte_length(4) == 0);
+  mu_assert("get byte length (4)", get_byte_length() == 4);
+  
+  mu_assert("set byte with wrong length", set_byte_length(5) != 0);
+  return 0;
+}
+
+/**
+ * read_adata automatic byte length comprehension testing.
+ */
+static char *
+read_adata_test() {
+  unsigned char sbuf[] = { 'a', 'b', 'c', 'd' };
+  unsigned char rbuf[10];
+
+  bzero(rbuf, 10);
+  write_length1(fd[0], 4);
+  write_data(fd[0], sbuf, 4);
+  set_byte_length(1);
+  read_adata(fd[1], rbuf, 10);
+  mu_assert("read_adata 1 byte length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("read_adata 1 byte length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("read_adata 1 byte length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("read_adata 1 byte length, [3] == 'd'", sbuf[3] == rbuf[3]);
+
+  bzero(rbuf, 10);
+  write_length2(fd[0], 4);
+  write_data(fd[0], sbuf, 4);
+  set_byte_length(2);
+  read_adata(fd[1], rbuf, 10);
+  mu_assert("read_adata 2 bytes length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("read_adata 2 bytes length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("read_adata 2 bytes length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("read_adata 2 bytes length, [3] == 'd'", sbuf[3] == rbuf[3]);
+
+  bzero(rbuf, 10);
+  write_length4(fd[0], 4);
+  write_data(fd[0], sbuf, 4);
+  set_byte_length(4);
+  read_adata(fd[1], rbuf, 10);
+  mu_assert("read_adata 4 bytes length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("read_adata 4 bytes length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("read_adata 4 bytes length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("read_adata 4 bytes length, [3] == 'd'", sbuf[3] == rbuf[3]);
+
+  return 0;
+}
+
+/**
+ * write_adata automatic byte length writting and encoding.
+ */
+static char *
+write_adata_test() {
+  unsigned char sbuf[] = { 'a', 'b', 'c', 'd' };
+  unsigned char rbuf[10];
+  int length = 0;
+  
+  bzero(rbuf, 10);
+  set_byte_length(1);
+  write_adata(fd[0], sbuf, 4);
+  length = read_length1(fd[1]);
+  read_data(fd[1], rbuf, length);
+  mu_assert("write_adata 1 byte length", length == 0x4);
+  mu_assert("write_adata 1 byte length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("write_adata 1 byte length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("write_adata 1 byte length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("write_adata 1 byte length, [3] == 'd'", sbuf[3] == rbuf[3]);
+
+  bzero(rbuf, 10);
+  set_byte_length(2);
+  write_adata(fd[0], sbuf, 4);
+  length = read_length2(fd[1]);
+  read_data(fd[1], rbuf, length);
+  mu_assert("write_adata 2 bytes length", length == 0x4);
+  mu_assert("write_adata 2 bytes length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("write_adata 2 bytes length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("write_adata 2 bytes length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("write_adata 2 bytes length, [3] == 'd'", sbuf[3] == rbuf[3]);
+
+  bzero(rbuf, 10);
+  set_byte_length(4);
+  write_adata(fd[0], sbuf, 4);
+  length = read_length4(fd[1]);
+  read_data(fd[1], rbuf, length);
+  mu_assert("write_adata 4 bytes length", length == 0x4);
+  mu_assert("write_adata 4 bytes length, [0] == 'a'", sbuf[0] == rbuf[0]);
+  mu_assert("write_adata 4 bytes length, [1] == 'b'", sbuf[1] == rbuf[1]);
+  mu_assert("write_adata 4 bytes length, [2] == 'c'", sbuf[2] == rbuf[2]);
+  mu_assert("write_adata 4 bytes length, [3] == 'd'", sbuf[3] == rbuf[3]);
+  
+  return 0;
+}
+
 /** 
  *init_test create 2 file descriptors (pipe) stored in fd buffer.
  */
@@ -259,6 +379,10 @@ static char * all_tests() {
         mu_run_test(write_length1_test);
         mu_run_test(write_length2_test);
         mu_run_test(write_length4_test);
+        mu_run_test(write_length_test);
+        mu_run_test(byte_length_test);
+        mu_run_test(read_adata_test);
+        mu_run_test(write_adata_test);
         end_test();
 	return 0;
 }
